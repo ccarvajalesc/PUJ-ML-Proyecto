@@ -1,0 +1,12 @@
+services:
+
+  icfes-app:
+
+    build: .
+
+    container_name: icfes-streamlit
+
+    ports:
+      - "8501:8501"
+
+    restart: unless-stopped
