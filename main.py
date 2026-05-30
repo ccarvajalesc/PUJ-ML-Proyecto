@@ -41,6 +41,29 @@ FEATURE_VALUES = metadata["feature_values"]
 # ==========================================================
 # Funciones
 # ==========================================================
+def generar_plantilla():
+
+    ejemplo = {}
+
+    for col in FEATURES:
+
+        ejemplo[col] = FEATURE_VALUES[col][0]
+
+    df = pd.DataFrame([ejemplo])
+
+    output = BytesIO()
+
+    with pd.ExcelWriter(
+        output,
+        engine="openpyxl"
+    ) as writer:
+
+        df.to_excel(
+            writer,
+            index=False
+        )
+
+    return output.getvalue()
 
 def predict_single(data):
 
@@ -161,6 +184,14 @@ else:
         El archivo debe contener exactamente las columnas
         utilizadas durante el entrenamiento.
         """
+    )
+    st.subheader("Plantilla Excel")
+
+    st.download_button(
+        label="📥 Descargar plantilla",
+        data=generar_plantilla(),
+        file_name="plantilla_icfes.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
     uploaded_file = st.file_uploader(
