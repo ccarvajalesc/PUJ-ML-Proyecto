@@ -29,7 +29,7 @@ Los modelos evaluados fueron:
 * Redes Neuronales Artificiales
 * XGBoost
 
-Tras la comparación experimental, el modelo seleccionado para despliegue fue **XGBoost en clasificación binaria (Bajo / Alto)**, al presentar el mejor equilibrio entre desempeño predictivo y capacidad de generalización.
+Tras la comparación experimental de los distintos enfoques evaluados, el modelo seleccionado para despliegue fue **XGBoost para clasificación binaria (Bajo / Alto)**, al obtener el mejor desempeño global en las métricas de evaluación consideradas.
 
 ---
 
@@ -213,6 +213,105 @@ http://localhost:8501
 
 ---
 
+## Instalación de Docker
+
+Para ejecutar la aplicación mediante contenedores es necesario tener Docker instalado en el sistema.
+
+### Windows
+
+1. Descargar Docker Desktop desde:
+
+```text
+https://www.docker.com/products/docker-desktop/
+```
+
+2. Ejecutar el instalador y seguir los pasos del asistente.
+
+3. Reiniciar el equipo si es solicitado.
+
+4. Verificar la instalación:
+
+```bash
+docker --version
+docker compose version
+```
+
+### Linux (Ubuntu)
+
+Actualizar repositorios:
+
+```bash
+sudo apt update
+```
+
+Instalar dependencias:
+
+```bash
+sudo apt install -y ca-certificates curl gnupg
+```
+
+Agregar la llave oficial de Docker:
+
+```bash
+sudo install -m 0755 -d /etc/apt/keyrings
+
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+| sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+```
+
+Agregar el repositorio:
+
+```bash
+echo \
+  "deb [arch=$(dpkg --print-architecture) \
+  signed-by=/etc/apt/keyrings/docker.gpg] \
+  https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" \
+| sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
+
+Instalar Docker:
+
+```bash
+sudo apt update
+
+sudo apt install -y \
+docker-ce \
+docker-ce-cli \
+containerd.io \
+docker-buildx-plugin \
+docker-compose-plugin
+```
+
+Verificar instalación:
+
+```bash
+docker --version
+docker compose version
+```
+
+(Opcional) Ejecutar Docker sin sudo:
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+Cerrar sesión y volver a ingresar para aplicar los cambios.
+
+### Verificación
+
+Ejecutar:
+
+```bash
+docker run hello-world
+```
+
+Si aparece el mensaje de bienvenida, Docker se encuentra correctamente instalado.
+
+---
+
 ## Ejecución mediante Docker
 
 ### Construir imagen
@@ -265,7 +364,25 @@ docker compose down
 
   * **Bajo**
   * **Alto**
+
 * Los valores categóricos no observados durante el entrenamiento son manejados automáticamente por el pipeline de preprocesamiento.
+
+---
+
+## Distribución de responsabilidades
+
+Las actividades desarrolladas durante el proyecto fueron distribuidas de la siguiente manera:
+
+| Actividad | Responsable |
+|------------|------------|
+| Experimentación con Redes Neuronales (RN) | Mateo Ruiz Mendoza |
+| Experimentación con Regresión Logística (RL) | Mateo Ruiz Mendoza |
+| Experimentación con XGBoost | Carlos Manuel Carvajales Castrillo |
+| Experimentación con Random Forest | Carlos Manuel Carvajales Castrillo |
+| Elaboración del informe final | Mateo Ruiz Mendoza y Carlos Manuel Carvajales Castrillo |
+| Desarrollo de la aplicación Front-End (Streamlit) | Mateo Ruiz Mendoza y Carlos Manuel Carvajales Castrillo |
+| Presentación final del proyecto | Mateo Ruiz Mendoza y Carlos Manuel Carvajales Castrillo |
+| Video de sustentación | Mateo Ruiz Mendoza y Carlos Manuel Carvajales Castrillo |
 
 ---
 
