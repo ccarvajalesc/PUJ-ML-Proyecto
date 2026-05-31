@@ -185,6 +185,11 @@ else:
         utilizadas durante el entrenamiento.
         """
     )
+
+    # ------------------------------------------------------
+    # Descargar plantilla
+    # ------------------------------------------------------
+
     st.subheader("Plantilla Excel")
 
     st.download_button(
@@ -194,58 +199,127 @@ else:
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
+    # ------------------------------------------------------
+    # Cargar archivo
+    # ------------------------------------------------------
+
     uploaded_file = st.file_uploader(
         "Subir archivo Excel",
         type=["xlsx"]
     )
 
-    if uploaded_file:
+    if uploaded_file is not None:
 
         try:
 
-            df = pd.read_excel(
-                uploaded_file
+            with st.spinner(
+                "Leyendo archivo..."
+            ):
+
+                df = pd.read_excel(
+                    uploaded_file
+                )
+
+            st.success(
+                f"Archivo cargado correctamente "
+                f"({len(df):,} registros)"
             )
+
+            # --------------------------------------------------
+            # Validar columnas
+            # --------------------------------------------------
 
             missing = set(FEATURES) - set(df.columns)
 
             if missing:
 
                 st.error(
-                    f"Faltan columnas: {list(missing)}"
+                    "Faltan las siguientes columnas:"
                 )
 
-            else:
-
-                st.success(
-                    f"Archivo válido ({len(df):,} registros)"
+                st.write(
+                    sorted(list(missing))
                 )
 
-                if st.button(
-                    "Generar Predicciones"
-                ):
+                st.stop()
 
-                    result_df = predict_excel(df)
+            # --------------------------------------------------
+            # Reordenar columnas
+            # --------------------------------------------------
 
-                    output = BytesIO()
+            df = df[FEATURES]
 
-                    with pd.ExcelWriter(
-                        output,
-                        engine="openpyxl"
-                    ) as writer:
+            # --------------------------------------------------
+            # Predicción
+            # --------------------------------------------------
 
-                        result_df.to_excel(
-                            writer,
-                            index=False
-                        )
+            with st.spinner(
+                "Generando predicciones..."
+            ):
 
-                    st.download_button(
-                        label="Descargar Excel",
-                        data=output.getvalue(),
-                        file_name="predicciones_icfes.xlsx",
-                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                    )
+                preds = modelo.predict(df)
+
+            # --------------------------------------------------
+            # Compatibilidad por si el modelo
+            # devuelve one-hot
+            # --------------------------------------------------
+
+            import numpy as np
+
+            preds = np.asarray(preds)
+
+            if len(preds.shape) > 1:
+
+                preds = preds.argmax(axis=1)
+
+            # --------------------------------------------------
+            # Construcción resultado
+            # --------------------------------------------------
+
+            result_df = df.copy()
+
+            result_df["prediction"] = preds
+
+            result_df["prediction_label"] = [
+                LABELS[int(x)]
+                for x in preds
+            ]
+
+            # --------------------------------------------------
+            # Exportar Excel
+            # --------------------------------------------------
+
+            output = BytesIO()
+
+            with pd.ExcelWriter(
+                output,
+                engine="openpyxl"
+            ) as writer:
+
+                result_df.to_excel(
+                    writer,
+                    index=False
+                )
+
+            st.success(
+                "Predicciones generadas correctamente."
+            )
+
+            st.download_button(
+                label="📥 Descargar Excel con predicciones",
+                data=output.getvalue(),
+                file_name="predicciones_icfes.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
 
         except Exception as e:
 
-            st.error(str(e))
+            st.error(
+                f"Error procesando archivo: {str(e)}"
+            )
+
+            import traceback
+
+            st.code(
+                traceback.format_exc()
+            )
